@@ -5,18 +5,18 @@
 	.globl	@feat.00
 .set @feat.00, 0
 	.file	"LLVMDialectModule"
-	.def	counter_eval;
+	.def	Dut_eval;
 	.scl	2;
 	.type	32;
 	.endef
 	.text
-	.globl	counter_eval                    # -- Begin function counter_eval
+	.globl	Dut_eval                        # -- Begin function Dut_eval
 	.p2align	4
-counter_eval:                           # @counter_eval
+Dut_eval:                               # @Dut_eval
 .Lfunc_begin0:
 # %bb.0:
 	.file	1 "model.mlir"
-	.loc	1 1 23 prologue_end             # model.mlir:1:23
+	.loc	1 2 19 prologue_end             # model.mlir:2:19
 	movzbl	(%rcx), %eax
 	movb	%al, 1(%rcx)
 	movzbl	2(%rcx), %edx
@@ -25,16 +25,16 @@ counter_eval:                           # @counter_eval
 	testb	%al, %dl
 	je	.LBB0_2
 # %bb.1:
-	.loc	1 4 9                           # model.mlir:4:9
+	.loc	1 5 9                           # model.mlir:5:9
 	incb	3(%rcx)
 .LBB0_2:
-	.loc	1 4 9                           # model.mlir:4:9
+	.loc	1 5 9                           # model.mlir:5:9
 	movzbl	3(%rcx), %eax
-	.loc	1 2 10                          # model.mlir:2:10
+	.loc	1 3 10                          # model.mlir:3:10
 	movb	%al, 4(%rcx)
-	.loc	1 4 9                           # model.mlir:4:9
+	.loc	1 5 9                           # model.mlir:5:9
 	movb	%al, 5(%rcx)
-	.loc	1 1 1                           # model.mlir:1:1
+	.loc	1 2 1                           # model.mlir:2:1
 	retq
 .Ltmp0:
 .Lfunc_end0:
@@ -52,66 +52,37 @@ entry:                                  # @entry
 # %bb.0:
 	pushq	%rsi
 	.seh_pushreg %rsi
-	pushq	%rdi
-	.seh_pushreg %rdi
-	subq	$40, %rsp
-	.seh_stackalloc 40
+	subq	$32, %rsp
+	.seh_stackalloc 32
 	.seh_endprologue
-	.loc	1 14 3 prologue_end             # model.mlir:14:3
+	.loc	1 15 3 prologue_end             # model.mlir:15:3
 	movl	$6, %ecx
 	callq	malloc
 	movq	%rax, %rsi
 	movl	$0, (%rax)
 	movw	$0, 4(%rax)
-	.loc	1 15 5                          # model.mlir:15:5
-	movb	$1, (%rax)
-	.loc	1 16 5                          # model.mlir:16:5
-	movq	%rax, %rcx
-	callq	counter_eval
 	.loc	1 17 5                          # model.mlir:17:5
-	movb	$0, (%rsi)
+	movb	$1, (%rax)
 	.loc	1 18 5                          # model.mlir:18:5
-	movq	%rsi, %rcx
-	callq	counter_eval
-	.loc	1 20 13                         # model.mlir:20:13
-	movzbl	4(%rsi), %edx
+	movq	%rax, %rcx
+	callq	Dut_eval
 	.loc	1 21 5                          # model.mlir:21:5
-	leaq	"_arc_sim_emit_full_counter value"(%rip), %rdi
-	movq	%rdi, %rcx
-	callq	printf
-	.loc	1 25 5                          # model.mlir:25:5
-	movb	$1, (%rsi)
-	.loc	1 26 5                          # model.mlir:26:5
-	movq	%rsi, %rcx
-	callq	counter_eval
-	.loc	1 27 5                          # model.mlir:27:5
 	movb	$0, (%rsi)
-	.loc	1 28 5                          # model.mlir:28:5
+	.loc	1 22 5                          # model.mlir:22:5
 	movq	%rsi, %rcx
-	callq	counter_eval
-	.loc	1 30 5                          # model.mlir:30:5
-	movb	$1, (%rsi)
-	.loc	1 31 5                          # model.mlir:31:5
-	movq	%rsi, %rcx
-	callq	counter_eval
-	.loc	1 32 5                          # model.mlir:32:5
-	movb	$0, (%rsi)
-	.loc	1 33 5                          # model.mlir:33:5
-	movq	%rsi, %rcx
-	callq	counter_eval
-	.loc	1 35 13                         # model.mlir:35:13
+	callq	Dut_eval
+	.loc	1 25 13                         # model.mlir:25:13
 	movzbl	4(%rsi), %edx
-	.loc	1 36 5                          # model.mlir:36:5
-	movq	%rdi, %rcx
+	.loc	1 27 5                          # model.mlir:27:5
+	leaq	"_arc_sim_emit_full_Dut o"(%rip), %rcx
 	callq	printf
-	.loc	1 14 3                          # model.mlir:14:3
+	.loc	1 15 3                          # model.mlir:15:3
 	movq	%rsi, %rcx
 	callq	free
 	nop
 	.seh_startepilogue
-	.loc	1 39 3 epilogue_begin           # model.mlir:39:3
-	addq	$40, %rsp
-	popq	%rdi
+	.loc	1 30 3 epilogue_begin           # model.mlir:30:3
+	addq	$32, %rsp
 	popq	%rsi
 	.seh_endepilogue
 	retq
@@ -120,9 +91,8 @@ entry:                                  # @entry
 	.seh_endproc
                                         # -- End function
 	.section	.rdata,"dr"
-	.p2align	4, 0x0                          # @"_arc_sim_emit_full_counter value"
-"_arc_sim_emit_full_counter value":
-	.asciz	"counter value = %zx\n"
+"_arc_sim_emit_full_Dut o":             # @"_arc_sim_emit_full_Dut o"
+	.asciz	"Dut o = %zx\n"
 
 	.section	.debug_abbrev,"dr"
 	.byte	1                               # Abbreviation Code

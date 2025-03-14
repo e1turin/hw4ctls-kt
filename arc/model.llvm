@@ -1,70 +1,59 @@
 ; ModuleID = 'LLVMDialectModule'
 source_filename = "LLVMDialectModule"
 
-@"_arc_sim_emit_full_counter value" = internal constant [21 x i8] c"counter value = %zx\0A\00"
+@"_arc_sim_emit_full_Dut o" = internal constant [13 x i8] c"Dut o = %zx\0A\00"
 
-declare void @printf(ptr, ...)
+declare !dbg !3 void @printf(ptr, ...)
 
-declare void @free(ptr)
+declare !dbg !6 void @free(ptr)
 
-declare ptr @malloc(i64)
+declare !dbg !7 ptr @malloc(i64)
 
-declare void @exit(i32)
+declare !dbg !8 void @exit(i32)
 
-define void @counter_eval(ptr %0) {
-  %2 = load i1, ptr %0, align 1
-  %3 = getelementptr i8, ptr %0, i32 1
-  store i1 %2, ptr %3, align 1
-  %4 = load i1, ptr %0, align 1
-  %5 = getelementptr i8, ptr %0, i32 2
-  %6 = load i1, ptr %5, align 1
-  store i1 %4, ptr %5, align 1
-  %7 = xor i1 %6, %4
-  %8 = and i1 %7, %4
-  br i1 %8, label %9, label %13
+define void @Dut_eval(ptr %0) !dbg !9 {
+  %2 = load i1, ptr %0, align 1, !dbg !10
+  %3 = getelementptr i8, ptr %0, i32 1, !dbg !10
+  store i1 %2, ptr %3, align 1, !dbg !10
+  %4 = load i1, ptr %0, align 1, !dbg !10
+  %5 = getelementptr i8, ptr %0, i32 2, !dbg !10
+  %6 = load i1, ptr %5, align 1, !dbg !10
+  store i1 %4, ptr %5, align 1, !dbg !10
+  %7 = xor i1 %6, %4, !dbg !10
+  %8 = and i1 %7, %4, !dbg !10
+  br i1 %8, label %9, label %13, !dbg !10
 
 9:                                                ; preds = %1
-  %10 = getelementptr i8, ptr %0, i32 3
-  %11 = load i8, ptr %10, align 1
-  %12 = add i8 %11, 1
-  store i8 %12, ptr %10, align 1
-  br label %13
+  %10 = getelementptr i8, ptr %0, i32 3, !dbg !11
+  %11 = load i8, ptr %10, align 1, !dbg !11
+  %12 = add i8 %11, 1, !dbg !11
+  store i8 %12, ptr %10, align 1, !dbg !11
+  br label %13, !dbg !10
 
 13:                                               ; preds = %9, %1
-  %14 = getelementptr i8, ptr %0, i32 3
-  %15 = load i8, ptr %14, align 1
-  %16 = getelementptr i8, ptr %0, i32 4
-  store i8 %15, ptr %16, align 1
-  %17 = load i8, ptr %14, align 1
-  %18 = getelementptr i8, ptr %0, i32 5
-  store i8 %17, ptr %18, align 1
-  ret void
+  %14 = getelementptr i8, ptr %0, i32 3, !dbg !11
+  %15 = load i8, ptr %14, align 1, !dbg !11
+  %16 = getelementptr i8, ptr %0, i32 4, !dbg !12
+  store i8 %15, ptr %16, align 1, !dbg !12
+  %17 = load i8, ptr %14, align 1, !dbg !11
+  %18 = getelementptr i8, ptr %0, i32 5, !dbg !11
+  store i8 %17, ptr %18, align 1, !dbg !11
+  ret void, !dbg !13
 }
 
-define void @entry() {
-  %1 = call ptr @malloc(i64 6)
-  call void @llvm.memset.p0.i64(ptr %1, i8 0, i64 6, i1 false)
-  store i1 true, ptr %1, align 1
-  call void @counter_eval(ptr %1)
-  store i1 false, ptr %1, align 1
-  call void @counter_eval(ptr %1)
-  %2 = getelementptr i8, ptr %1, i32 4
-  %3 = load i8, ptr %2, align 1
-  %4 = zext i8 %3 to i64
-  call void (ptr, ...) @printf(ptr @"_arc_sim_emit_full_counter value", i64 %4)
-  store i1 true, ptr %1, align 1
-  call void @counter_eval(ptr %1)
-  store i1 false, ptr %1, align 1
-  call void @counter_eval(ptr %1)
-  store i1 true, ptr %1, align 1
-  call void @counter_eval(ptr %1)
-  store i1 false, ptr %1, align 1
-  call void @counter_eval(ptr %1)
-  %5 = load i8, ptr %2, align 1
-  %6 = zext i8 %5 to i64
-  call void (ptr, ...) @printf(ptr @"_arc_sim_emit_full_counter value", i64 %6)
-  call void @free(ptr %1)
-  ret void
+define void @entry() !dbg !14 {
+  %1 = call ptr @malloc(i64 6), !dbg !15
+  call void @llvm.memset.p0.i64(ptr %1, i8 0, i64 6, i1 false), !dbg !15
+  store i1 true, ptr %1, align 1, !dbg !16
+  call void @Dut_eval(ptr %1), !dbg !17
+  store i1 false, ptr %1, align 1, !dbg !18
+  call void @Dut_eval(ptr %1), !dbg !19
+  %2 = getelementptr i8, ptr %1, i32 4, !dbg !20
+  %3 = load i8, ptr %2, align 1, !dbg !20
+  %4 = zext i8 %3 to i64, !dbg !21
+  call void (ptr, ...) @printf(ptr @"_arc_sim_emit_full_Dut o", i64 %4), !dbg !21
+  call void @free(ptr %1), !dbg !15
+  ret void, !dbg !22
 }
 
 ; Function Attrs: nocallback nofree nounwind willreturn memory(argmem: write)
@@ -73,5 +62,28 @@ declare void @llvm.memset.p0.i64(ptr writeonly captures(none), i8, i64, i1 immar
 attributes #0 = { nocallback nofree nounwind willreturn memory(argmem: write) }
 
 !llvm.module.flags = !{!0}
+!llvm.dbg.cu = !{!1}
 
 !0 = !{i32 2, !"Debug Info Version", i32 3}
+!1 = distinct !DICompileUnit(language: DW_LANG_C, file: !2, producer: "MLIR", isOptimized: true, runtimeVersion: 0, emissionKind: LineTablesOnly)
+!2 = !DIFile(filename: "model.mlir", directory: "")
+!3 = !DISubprogram(name: "printf", linkageName: "printf", scope: !2, file: !2, type: !4, spFlags: DISPFlagOptimized)
+!4 = !DISubroutineType(cc: DW_CC_normal, types: !5)
+!5 = !{}
+!6 = !DISubprogram(name: "free", linkageName: "free", scope: !2, file: !2, type: !4, spFlags: DISPFlagOptimized)
+!7 = !DISubprogram(name: "malloc", linkageName: "malloc", scope: !2, file: !2, type: !4, spFlags: DISPFlagOptimized)
+!8 = !DISubprogram(name: "exit", linkageName: "exit", scope: !2, file: !2, type: !4, spFlags: DISPFlagOptimized)
+!9 = distinct !DISubprogram(name: "Dut_eval", linkageName: "Dut_eval", scope: !2, file: !2, line: 2, type: !4, scopeLine: 1, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !1)
+!10 = !DILocation(line: 2, column: 19, scope: !9)
+!11 = !DILocation(line: 5, column: 9, scope: !9)
+!12 = !DILocation(line: 3, column: 10, scope: !9)
+!13 = !DILocation(line: 2, column: 1, scope: !9)
+!14 = distinct !DISubprogram(name: "entry", linkageName: "entry", scope: !2, file: !2, line: 11, type: !4, scopeLine: 1, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !1)
+!15 = !DILocation(line: 15, column: 3, scope: !14)
+!16 = !DILocation(line: 17, column: 5, scope: !14)
+!17 = !DILocation(line: 18, column: 5, scope: !14)
+!18 = !DILocation(line: 21, column: 5, scope: !14)
+!19 = !DILocation(line: 22, column: 5, scope: !14)
+!20 = !DILocation(line: 25, column: 13, scope: !14)
+!21 = !DILocation(line: 27, column: 5, scope: !14)
+!22 = !DILocation(line: 30, column: 3, scope: !14)

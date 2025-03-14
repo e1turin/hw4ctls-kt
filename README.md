@@ -7,14 +7,13 @@ Some source files are taken from  https://github.com/circt/circt and https://git
 ```sh
 cd arc
 
-arcilator --run --print-debug-info --observe-wires --observe-registers --observe-ports  model.mlir
-# Outputs:
-# counter value = 1
-# counter value = 3
+arcilator model.mlir --run --print-debug-info --observe-wires --observe-registers --observe-ports
+## Outputs:
+#> dut o = 1
 
-arcilator --emit-mlir --print-debug-info --observe-wires --observe-registers --observe-ports  model.mlir | save -f model-out.mlir
+arcilator model.mlir --emit-mlir --print-debug-info --observe-wires --observe-registers --observe-ports | save -f model-out.mlir
 
-arcilator --emit-llvm --print-debug-info --observe-wires --observe-registers --observe-ports  model.mlir | save -f model.llvm
+arcilator model.mlir --emit-llvm --print-debug-info --observe-wires --observe-registers --observe-ports | save -f model.llvm
 
 arcilator model.mlir --state-file=model.json --print-debug-info --observe-wires --observe-registers --observe-ports | llc -O3 --filetype=obj -o model.o
 llvm-objdump --disassemble model.o | save -f model.S
