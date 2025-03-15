@@ -1,13 +1,11 @@
 #include "arcilator-runtime.h"
-#include "model.h"
+#include "out/model.h"
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <fstream>
 #include <iostream>
-#include <memory>
-#include <numeric>
 
 class DutModel {
   Dut model;
@@ -65,7 +63,7 @@ public:
     eval();
   }
 
-  void set_reset(bool reset) { /* TODO */ }
+  void set_reset(bool reset) { model.view.reset = reset; }
 
   void set_clk(bool clock) { model.view.clk = clock; }
 
@@ -110,8 +108,13 @@ int main(int argc, char *argv[]) {
 
   model.vcd_start(vcd_output_file.data());
 
-  for (unsigned i = 0; i < 20; ++i) {
-    // model.set_reset(i < 10);
+  unsigned i = 0;
+  for (; i < 10; ++i) {
+    model.set_reset(true);
+    model.clock();
+  }
+  model.set_reset(false);
+  for (; i < 40; ++i) {
     model.clock();
   }
 
