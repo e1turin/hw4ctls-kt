@@ -22,6 +22,19 @@ arcilator model.mlir --state-file=model.json --print-debug-info --observe-wires 
 
 
 python arcilator-header-cpp.py model.json --view-depth 1 | save -f model.h
+
+clang++ model-main.cpp model.o -o model-main.exe
+./model-main.exe
+## Outputs:
+#> dut o = 20
+#> total time = 1700
  ```
 
+ > total time is approximate and varies from 1400 to 2400 for 20 clock cycles
+
 ![circt arcilator simulation pipeline](./arc/CIRCT-pipeline.excalidraw.svg)
+
+
+TODO:
+- add reset to Dut
+- add constexpr model field "NUM_PORTS", "PORT_NAMES"
