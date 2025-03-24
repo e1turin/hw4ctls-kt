@@ -37,6 +37,22 @@ VCD have written to file 'out/model-trace.vcd'
 ```
 > Total time is approximate and varies from 1000 to 3000 for 20 clock cycles.
 
+First try to call model from Kotlin/Native (see MPP template sources).
+
+```sh
+llvm-ar rc out/libdut.a out/model.o
+# copu libdut.a to src/mingwX64Main/kotlin/c/
+gradlew.bat :mingwX64Binaries
+# cd library\build\bin\mingwX64\releaseExecutable
+./library.exe
+```
+
+prints:
+```console
+Hello Native world!
+11
+```
+
 ![circt arcilator simulation pipeline](./arc/CIRCT-pipeline.excalidraw.svg)
 
 

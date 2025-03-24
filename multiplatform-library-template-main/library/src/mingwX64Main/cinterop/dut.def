@@ -1,0 +1,6 @@
+headers = dut.h
+compilerOpts = -Isrc/mingwX64Main/cinterop
+libraryPaths = src/mingwX64Main/c/
+staticLibraries = libdut.a
+# linkerOpts = -LD:\\absolute\\path\\to\\libdut.dll\\folder -ldut --verbose
+
