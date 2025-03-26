@@ -6,7 +6,7 @@ import kotlinx.cinterop.*
 actual fun main() {
     println("Hello Native world!")
     memScoped {
-        var state = alloc<dut.State>()
+        val state = alloc<dut.State>()
 
         state.clk = 0
         state.reset = 1

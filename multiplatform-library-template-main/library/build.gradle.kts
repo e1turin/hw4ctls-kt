@@ -1,4 +1,6 @@
 import com.vanniktech.maven.publish.SonatypeHost
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 
 plugins {
@@ -10,7 +12,16 @@ group = "io.github.kotlin"
 version = "1.0.0"
 
 kotlin {
-    jvm()
+    jvmToolchain(22)
+    jvm {
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_22
+        }
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
+        mainRun {
+            mainClass = "io.github.kotlin.fibonacci.HelloKt"
+        }
+    }
     linuxX64()
     mingwX64 {
         binaries {
@@ -22,10 +33,6 @@ kotlin {
             cinterops.create("dut") {
                 defFile("src/mingwX64Main/cinterop/dut.def")
             }
-//            cinterops.register("dut") {
-//                definitionFile = layout.projectDirectory.file("src/mingwX64Main/cinterop/dut.def")
-//                extraOpts("-libraryPath", layout.projectDirectory.dir("src/mingwX64Main/c/").asFile.absolutePath)
-//            }
         }
     }
 
@@ -75,4 +82,11 @@ mavenPublishing {
             developerConnection = "ZZZ"
         }
     }
+}
+
+tasks.withType<JavaExec>().configureEach {
+    jvmArgs(
+        "--enable-native-access=ALL-UNNAMED",
+        "-Djava.library.path=${projectDir}/src/mingwX64Main/c/"
+    )
 }
