@@ -7,7 +7,7 @@ import java.lang.foreign.MemoryLayout
 import java.lang.foreign.SymbolLookup
 import java.lang.foreign.ValueLayout
 
-actual fun main(): Unit {
+fun main(): Unit {
     println("Hello JVM World!")
 
     System.loadLibrary("model")

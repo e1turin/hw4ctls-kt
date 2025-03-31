@@ -89,10 +89,10 @@ Hello JVM World!
 Dut.o=11
 ```
 
+### CIRCT Pipeline
 
 ![circt arcilator simulation pipeline](./arc/CIRCT-pipeline.excalidraw.svg)
 
+### TODO
 
-TODO:
-- add reset to Dut
-- add constexpr model field "NUM_PORTS", "PORT_NAMES"
+- [ ] add constexpr model field "NUM_PORTS", "PORT_NAMES"

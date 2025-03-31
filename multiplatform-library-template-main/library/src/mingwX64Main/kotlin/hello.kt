@@ -3,7 +3,7 @@ package io.github.kotlin.fibonacci
 import kotlinx.cinterop.*
 
 @OptIn(ExperimentalForeignApi::class)
-actual fun main() {
+fun main() {
     println("Hello Native world!")
     memScoped {
         val state = alloc<dut.State>()
