@@ -1,6 +1,8 @@
 import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.konan.target.HostManager
+import org.jetbrains.kotlin.konan.target.KonanTarget
 
 
 plugins {
@@ -8,7 +10,7 @@ plugins {
     alias(libs.plugins.vanniktech.mavenPublish)
 }
 
-group = "io.github.kotlin"
+group = "io.github.e1turin"
 version = "1.0.0"
 
 kotlin {
@@ -17,16 +19,26 @@ kotlin {
         compilerOptions {
             jvmTarget = JvmTarget.JVM_22
         }
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-        mainRun {
-            mainClass = "io.github.kotlin.fibonacci.HelloKt"
+        @OptIn(ExperimentalKotlinGradlePluginApi::class) mainRun {
+            mainClass = "io.github.e1turin.cirkt.HelloKt"
         }
     }
-    linuxX64()
+    linuxX64 {
+        binaries {
+            executable {
+                entryPoint = "io.github.e1turin.cirkt.main"
+            }
+        }
+        compilations.getByName("main") {
+            cinterops.create("dut") {
+                defFile("src/linuxX64Main/cinterop/dut.def")
+            }
+        }
+    }
     mingwX64 {
         binaries {
             executable {
-                entryPoint = "io.github.kotlin.fibonacci.main"
+                entryPoint = "io.github.e1turin.cirkt.main"
             }
         }
         compilations.getByName("main") {
@@ -85,8 +97,19 @@ mavenPublishing {
 }
 
 tasks.withType<JavaExec>().configureEach {
-    jvmArgs(
-        "--enable-native-access=ALL-UNNAMED",
-        "-Djava.library.path=${projectDir}/src/mingwX64Main/c/"
-    )
+    jvmArgs("--enable-native-access=ALL-UNNAMED")
+
+    val dynLibPath = "${projectDir}/src/jvmMain/lib/"
+
+    when (val host = HostManager.host) {
+        // by some reason setting up java.library.path variable do not give result
+        KonanTarget.LINUX_X64 -> environment("LD_LIBRARY_PATH", dynLibPath)
+
+        KonanTarget.MINGW_X64 -> jvmArgs("-Djava.library.path=${dynLibPath}")
+
+        // TODO: check build on MacOS
+        KonanTarget.MACOS_X64, KonanTarget.MACOS_ARM64 -> environment("DYLD_LIBRARY_PATH", dynLibPath)
+
+        else -> error("Unknown host: $host")
+    }
 }

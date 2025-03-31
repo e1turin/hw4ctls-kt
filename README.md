@@ -42,13 +42,17 @@ First try to call model from Kotlin/Native (see MPP template sources).
 ### static lib
 
 ```sh
-llvm-ar rc out/libdut.a out/model.o
-# copy libdut.a to src/mingwX64Main/kotlin/c/
+llvm-ar rc out/model.a out/model.o
+# copy model.a to src/mingwX64Main/kotlin/c/
+# copy model.a to src/linuxX64Main/kotlin/c/
 ```
 execute Kotlin application:
 ```sh
- gradlew.bat :library:mingwX64Binaries
+./gradlew.bat :library:mingwX64Binaries
 ./library/build/bin/mingwX64/releaseExecutable/library.exe
+ # or
+./gradlew.bat :library:linuxX64Binaries
+./library/build/bin/linuxX64/releaseExecutable/library.kexe
 ```
 
 prints:
@@ -68,18 +72,34 @@ EXPORTS
 ```
 
 Using linker for properly compilation
+get object file with model, it's better to compile with PIC:
 ```sh
-# it's better to compile with PIC
 llc out/model.ll -O3 --filetype=obj -relocation-model=pic -o out/model.o
+```
+complile to dynamic library:
+
+on linux needs just shared library:
+```sh
+clang -shared -o out/libmodel.so out/model.o
+# copy libmodel.so to src/jvmMain/lib/
+```
+- and set up `LD_LIBRARY_PATH` on load with JVM, `java.library.path` is not enough!
+
+on windows it requires to export symbols:
+```sh
 clang -shared -o out/model.dll out/model.o
 lld-link /DLL /NOENTRY /DEF:model.def /out:out/model.dll out/model.o
 # or single command
 clang -shared -o out/model.dll out/model.o -Wl,/DEF:model.def
-# copy model.dll to src/mingwX64Main/kotlin/c/
+# copy model.dll to src/jvmMain/lib/
 ```
+- and set up `java.library.path`.
+
 execute Kotlin application:
 ```sh
-gradlew.bat :library:jvmRun
+./gradlew :library:jvmRun
+# or
+./gradlew.bat :library:jvmRun
 
 ```
 

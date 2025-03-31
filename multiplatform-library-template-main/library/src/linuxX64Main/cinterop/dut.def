@@ -1,0 +1,5 @@
+headers = dut.h
+compilerOpts = -Isrc/linuxX64Main/cinterop
+libraryPaths = src/linuxX64Main/lib/
+staticLibraries = model.a
+

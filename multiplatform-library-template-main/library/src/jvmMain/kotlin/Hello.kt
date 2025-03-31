@@ -1,4 +1,4 @@
-package io.github.kotlin.fibonacci
+package io.github.e1turin.cirkt
 
 import java.lang.foreign.Arena
 import java.lang.foreign.FunctionDescriptor
@@ -10,8 +10,16 @@ import java.lang.foreign.ValueLayout
 fun main(): Unit {
     println("Hello JVM World!")
 
-    System.loadLibrary("model")
-    val lookup = SymbolLookup.libraryLookup("model", Arena.ofAuto())//.loaderLookup()
+    val libName = "model"
+    System.loadLibrary(libName) // required for Windows
+
+    val properLibName = System.mapLibraryName(libName) // 'model.dll' on Windows or 'libmodel.so' on linux
+    println("proper library name: $properLibName")
+    println("library search path: ${System.getProperty("java.library.path")}")
+
+    val lookup = SymbolLookup.libraryLookup(properLibName, Arena.ofAuto())
+        .or(SymbolLookup.loaderLookup())
+        .or(Linker.nativeLinker().defaultLookup())
 
     val linker = Linker.nativeLinker()
 
