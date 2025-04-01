@@ -6,3 +6,6 @@
 
 gen/*
 gen/**
+
+out/*
+out/**

@@ -57,6 +57,35 @@ clean:
 rm gen/
 ```
 
+For simple counter `model.scala`:
+```scala
+class Model extends Module {
+  val io = IO(new Bundle {
+    val count = Output(UInt(8.W))
+  })
+  
+  val counter = RegInit(0.U(8.W))
+  counter := counter + 1.U
+  
+  io.count := counter
+}
+```
+
+Build simple model
+```sh
+scala-cli model.scala --main-class Main
+firtool gen/Dut.fir --format=fir --ir-hw -o gen/Dut.hw.mlir
+```
+
+and compile:
+```sh
+mkdir out
+arcilator gen/Dut.hw.mlir --emit-llvm --observe-memories --observe-named-values --observe-ports --observe-registers --observe-wires --state-file=out/model-states.json -o out/model.ll
+llc out/model.ll -O3 --filetype=obj -o out/model.o
+llvm-objdump --disassemble out/model.o | save -f out/model.objdump
+```
+- now comparing `arc/out/model.objdump` and `chisel/out/model.objdump` says it is similar but not equal
+
 ## Build Model
 
 Build script inside `arc/`:
