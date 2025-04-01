@@ -16,10 +16,12 @@ version = "1.0.0"
 kotlin {
     jvmToolchain(22)
     jvm {
+        withJava() // TODO: setup jextract task
         compilerOptions {
             jvmTarget = JvmTarget.JVM_22
         }
-        @OptIn(ExperimentalKotlinGradlePluginApi::class) mainRun {
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
+        mainRun {
             mainClass = "io.github.e1turin.cirkt.HelloKt"
         }
     }
