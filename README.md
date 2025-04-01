@@ -3,6 +3,61 @@
 Experiments with CIRCT: use infrastracture for modeling hardware in Kotlin.
 
 Some source files are taken from  https://github.com/circt/circt and https://github.com/circt/arc-tests repositories.
+- download latest `circt-full-` build: https://github.com/llvm/circt/releases
+
+## Create Model
+
+### With Chisel
+
+- https://www.chisel-lang.org/docs/installation
+- https://www.chisel-lang.org/docs/resources/faqs#get-me-firrtl
+
+Install Scala CLI
+- https://scala-cli.virtuslab.org/install/
+
+In chisel dir:
+
+Download Chisel sample project:
+```sh
+curl -O -L https://github.com/chipsalliance/chisel/releases/latest/download/chisel-example.scala
+```
+
+Add emit FIRRTL output stages:
+```scala
+object Main extends App {
+  ChiselStage.emitCHIRRTLFile(
+    new Foo,
+    Array("--target-dir", "gen"),
+  )
+}
+```
+
+Build model:
+```sh
+scala-cli chisel-example.scala --main-class Main
+```
+
+Get MLIR for required dialect
+```sh
+# firrtl
+firtool gen/Foo.fir --format=fir --parse-only -o gen/Foo.firrtl.mlir
+firtool gen/Foo.fir --format=fir --ir-fir -o gen/Foo.firrtl.mlir
+
+# hw
+firtool gen/Foo.fir --format=fir --ir-hw -o gen/Foo.hw.mlir
+
+# verilog
+firtool gen/Foo.fir --format=fir --ir-sv -o gen/Foo.sv.mlir
+firtool gen/Foo.fir --format=fir --ir-verilog -o gen/Foo.v.mlir
+firtool gen/Foo.fir --format=fir --verilog -disable-all-randomization -strip-debug-info -o gen/Foo.v
+```
+
+clean:
+```sh
+rm gen/
+```
+
+## Build Model
 
 Build script inside `arc/`:
 ```sh

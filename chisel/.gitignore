@@ -1,0 +1,8 @@
+.bsp/*
+.bsp/**
+
+.scala-build/*
+.scala-build/**
+
+gen/*
+gen/**
