@@ -9,14 +9,12 @@ import _root_.circt.stage.ChiselStage
 
 
 class Dut extends Module {
-  val io = IO(new Bundle {
-    val count = Output(UInt(8.W))
-  })
+  val count = IO(Output(UInt(8.W)))
   
   val counter = RegInit(0.U(8.W))
+  count := counter
+
   counter := counter + 1.U
-  
-  io.count := counter
 }
 
 object Main extends App {
