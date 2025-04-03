@@ -223,6 +223,18 @@ Dut.o=11
 
 ![circt arcilator simulation pipeline](./arc/CIRCT-pipeline.excalidraw.svg)
 
+#### Arcilator
+
+State file (`--state-file`) contains observable model states—attributes of object such as registers, wires, memory, etc in program: 
+- JSON format: https://github.com/llvm/circt/blob/d675c243c04339563517de1717dacbe3aa8309d5/lib/Dialect/Arc/ModelInfo.cpp#L130C3-L171C6
+  - uses values, setted here: https://github.com/llvm/circt/blob/d675c243c04339563517de1717dacbe3aa8309d5/lib/Dialect/Arc/ModelInfo.cpp#L67C5-L100C6
+    - uses such data struct: https://github.com/llvm/circt/blob/d675c243c04339563517de1717dacbe3aa8309d5/include/circt/Dialect/Arc/ModelInfo.h#L25C1-L40C38
+    - and Ops generated with TableGen: https://github.com/llvm/circt/blob/main/include/circt/Dialect/Arc/ArcOps.td
+    - and StateType from another generated header: https://github.com/llvm/circt/blob/main/include/circt/Dialect/Arc/ArcTypes.td
+- in object file, function always names in `<module name>_eval` format:
+  - https://github.com/llvm/circt/blob/d675c243c04339563517de1717dacbe3aa8309d5/lib/Conversion/ArcToLLVM/LowerArcToLLVM.cpp#L53C1-L55C2
+  - C++ Header generator relies on it: https://github.com/llvm/circt/blob/d675c243c04339563517de1717dacbe3aa8309d5/tools/arcilator/arcilator-header-cpp.py#L12C1-L16C41
+
 ### TODO
 
 - [ ] add constexpr model field "NUM_PORTS", "PORT_NAMES"
