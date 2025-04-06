@@ -86,6 +86,15 @@ llvm-objdump --disassemble out/model.o | save -f out/model.objdump
 
 ## Build Model
 
+on macos it's prefered to use docker with `--platform=amd64`:
+```sh
+docker run -it --name circt \
+  -v ${pwd}:/mnt/circt \
+  -v /path/to/CIRCT-release/linux/firtool-1.112.0:/mnt/circt-bin \ --platform=linux/amd64 \
+  ubuntu bash
+```
+or use x86 version of JDK to load x86 dylib.
+
 Build script inside `arc/`:
 ```sh
 arcilator model.mlir --emit-llvm --observe-memories --observe-named-values --observe-ports --observe-registers --observe-wires --state-file=out/model-states.json -o out/model.ll
@@ -180,6 +189,15 @@ clang -shared -o out/model.dll out/model.o -Wl,/DEF:model.def
   EXPORTS
       Dut_eval
   ```
+  - or manually use linker `/EXPORT:Dut_eval` option to export specific function.
+
+on macos:
+```sh
+# nushell
+clang -arch x86_64 -isysroot (xcrun --sdk macosx --show-sdk-path) -nostartfiles -nodefaultlibs -dynamiclib out/model.o -lSystem -o out/libmodel.dylib
+# copy libmodel.dylib to src/jvmMain/lib/
+```
+- only x86 jdk can load such library, so set JAVA_HOME to MacOS x64 version of JDK (https://jdk.java.net/archive/)
 
 #### FFM API with Jextract
 
