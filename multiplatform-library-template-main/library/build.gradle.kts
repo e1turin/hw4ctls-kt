@@ -8,6 +8,7 @@ import org.jetbrains.kotlin.konan.target.KonanTarget
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.vanniktech.mavenPublish)
+    alias(libs.plugins.kotlinxSerialization)
 }
 
 group = "io.github.e1turin"
@@ -22,7 +23,8 @@ kotlin {
         }
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         mainRun {
-            mainClass = "io.github.e1turin.cirkt.HelloKt"
+            mainClass = "io.github.e1turin.cirkt.Main"
+//            mainClass = "io.github.e1turin.cirkt.HelloKt"
         }
     }
     linuxX64 {
@@ -50,16 +52,26 @@ kotlin {
         }
     }
 
+//    macosArm64()
+//    macosX64()
+
     sourceSets {
         val commonMain by getting {
             dependencies {
-                //put your multiplatform dependencies here
+                implementation(libs.kotlinx.serialization.json)
             }
         }
         val commonTest by getting {
             dependencies {
                 implementation(libs.kotlin.test)
             }
+        }
+        val jvmMain by getting {
+            dependencies {
+                implementation("com.squareup:kotlinpoet:2.1.0")
+            }
+
+            resources.srcDirs("src/jvmMain/resources")
         }
     }
 }
@@ -113,5 +125,11 @@ tasks.withType<JavaExec>().configureEach {
         KonanTarget.MACOS_X64, KonanTarget.MACOS_ARM64 -> environment("DYLD_LIBRARY_PATH", dynLibPath)
 
         else -> error("Unknown host: $host")
+    }
+}
+
+tasks.named<Jar>("jvmJar") {
+    manifest {
+        attributes["Main-Class"] = "io.github.e1turin.cirkt.Main"
     }
 }

@@ -93,7 +93,7 @@ docker run -it --name circt \
   -v /path/to/CIRCT-release/linux/firtool-1.112.0:/mnt/circt-bin \ --platform=linux/amd64 \
   ubuntu bash
 ```
-or use x86 version of JDK to load x86 dylib.
+or use x86 version of JDK to load x86 dylib via Rosetta.
 
 Build script inside `arc/`:
 ```sh
@@ -252,6 +252,8 @@ State file (`--state-file`) contains observable model states—attributes of obj
 - in object file, function always names in `<module name>_eval` format:
   - https://github.com/llvm/circt/blob/d675c243c04339563517de1717dacbe3aa8309d5/lib/Conversion/ArcToLLVM/LowerArcToLLVM.cpp#L53C1-L55C2
   - C++ Header generator relies on it: https://github.com/llvm/circt/blob/d675c243c04339563517de1717dacbe3aa8309d5/tools/arcilator/arcilator-header-cpp.py#L12C1-L16C41
+- `initialFnSym` and `finalFnSym` defined with tablegen:
+  - https://github.com/llvm/circt/blob/2afb3cd0644297a6f7b7c185130bc4fcc0d3cd91/include/circt/Dialect/Arc/ArcOps.td#L483C1-L495C2
 
 ### TODO
 

@@ -12,7 +12,7 @@ import java.lang.foreign.ValueLayout
 val libName = "model"
 val properLibName = System.mapLibraryName(libName) // 'model.dll' on Windows or 'libmodel.so' on linux
 
-fun main(): Unit {
+fun playWithFFM() {
     println("Hello JVM World!")
 
     System.loadLibrary(libName) // required for Windows
