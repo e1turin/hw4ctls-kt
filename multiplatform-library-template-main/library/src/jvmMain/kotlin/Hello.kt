@@ -32,6 +32,7 @@ fun playWithFFM() {
 }
 
 private fun myFfmWrapper() {
+    println("Hello my FFM World!")
     Arena.ofConfined().use { arena ->
         val dut = Dut.instance(arena, "model")
 
@@ -51,7 +52,7 @@ private fun myFfmWrapper() {
             dut.eval()
         }
 
-        println("dut.o = ${dut.o} = ${dut.internal.o}")
+        println("dut.o=${dut.o}")
     }
 }
 

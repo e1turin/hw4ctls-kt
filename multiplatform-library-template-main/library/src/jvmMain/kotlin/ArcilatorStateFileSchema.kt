@@ -1,6 +1,5 @@
 package io.github.e1turin.cirkt
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
@@ -16,7 +15,7 @@ import kotlinx.serialization.Serializable
 //   unsigned memoryDepth = 0;  // number of words in a memory
 // };
 //
-// /// https://github.com/llvm/circt/blob/218c1857b44a7d8a54d9005135bf993d8893854c/include/circt/Dialect/Arc/ModelInfo.h#L35C1-L49C3
+// /// permalink: https://github.com/llvm/circt/blob/218c1857b44a7d8a54d9005135bf993d8893854c/include/circt/Dialect/Arc/ModelInfo.h#L35C1-L49C3
 // struct ModelInfo {
 //   std::string name;
 //   size_t numStateBytes;
@@ -24,22 +23,6 @@ import kotlinx.serialization.Serializable
 //   // ...
 // };
 //
-
-// Types of observable objects
-// serial names are taken from json encoder: https://github.com/llvm/circt/blob/d675c243c04339563517de1717dacbe3aa8309d5/lib/Dialect/Arc/ModelInfo.cpp#L130C3-L171C6
-@Serializable
-enum class StateType {
-    @SerialName("input")
-    INPUT,
-    @SerialName("output")
-    OUTPUT,
-    @SerialName("register")
-    REGISTER,
-    @SerialName("memory")
-    MEMORY,
-    @SerialName("wire")
-    WIRE
-}
 
 @Serializable
 data class StateInfo(
