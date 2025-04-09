@@ -121,7 +121,7 @@ class Dut(
             override val finalFunctionHandle: MethodHandle by lazy { stubFunctionHandle("finalFnSym is blank: '$finalFnSym'") }
         }
 
-        fun instance(stateArena: Arena = Arena.ofAuto(), libName: String, libArena: Arena = Arena.ofAuto()) =
+        fun instance(stateArena: Arena, libName: String, libArena: Arena = Arena.ofAuto()) =
             Dut(stateArena.allocate((NUM_STATE_BYTES)), library(libName, libArena))
     }
 

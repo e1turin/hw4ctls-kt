@@ -29,6 +29,35 @@ fun playWithFFM() {
     println("\n - - - \n")
 
     myFfmWrapper()
+
+    println("\n - - - \n")
+
+    generatedFfmWrapper()
+}
+
+private fun generatedFfmWrapper() {
+    println("Hello generated FFM World!")
+    Arena.ofConfined().use { arena ->
+        val dut = io.github.e1turin.cirkt.generated.Dut.instance(arena, "model")
+
+        dut.reset = 1
+        for (i in 0..10) {
+            dut.clk = 1
+            dut.eval()
+            dut.clk = 0
+            dut.eval()
+        }
+
+        dut.reset = 0
+        for (i in 0..10) {
+            dut.clk = 1
+            dut.eval()
+            dut.clk = 0
+            dut.eval()
+        }
+
+        println("dut.o=${dut.o}")
+    }
 }
 
 private fun myFfmWrapper() {

@@ -10,6 +10,10 @@ abstract class ModelLibrary(
     val initialFnSym: String,
     val finalFnSym: String,
 ) {
+    init {
+        System.loadLibrary(name)
+    }
+
     val libraryName: String = System.mapLibraryName(name)
 
     val symbolLookup: SymbolLookup = SymbolLookup
