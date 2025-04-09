@@ -11,6 +11,16 @@ class Dut(
     //    "name": "Dut",
 ) : Module("Dut", state, lib, NUM_STATE_BYTES) {
 
+    data class State(
+        val clk: Byte,
+        val reset: Byte,
+        val internalClk: Byte,
+        val internalReset: Byte,
+        val internalReg: Byte,
+        val internalO: Byte,
+        val o: Byte
+    )
+
     //      {
     //        "name": "clk",
     //        "offset": 0,
@@ -73,6 +83,7 @@ class Dut(
 
     fun eval() {
         lib.evalFunctionHandle.invokeExact(state)
+        println(dump())
     }
 
     fun initial() {
@@ -83,20 +94,36 @@ class Dut(
         lib.finalFunctionHandle.invokeExact(state)
     }
 
+    fun dump() = State(
+        clk,
+        reset,
+        internal.clk,
+        internal.reset,
+        internal.reg,
+        internal.o,
+        o
+    )
+
     companion object {
         //    "numStateBytes": 8,
         const val NUM_STATE_BYTES: Long = 8
 
-        //    "initialFnSym": "",
-        //    "finalFnSym": "",
-        fun library(arena: Arena) = object : ModuleLibrary("Dut", arena) {
+        fun library(name: String, arena: Arena) = object : ModuleLibrary(
+            name,
+            arena,
+            evalFnSym = "Dut_eval",
+            //    "initialFnSym": "",
+            initialFnSym = "",
+            //    "finalFnSym": "",
+            finalFnSym = ""
+        ) {
             override val evalFunctionHandle: MethodHandle = functionHandle(evalFnSym)
             override val initialFunctionHandle: MethodHandle by lazy { stubFunctionHandle("initialFnSym is blank: '$initialFnSym'") }
             override val finalFunctionHandle: MethodHandle by lazy { stubFunctionHandle("finalFnSym is blank: '$finalFnSym'") }
         }
 
-        fun instance(stateArena: Arena = Arena.ofAuto(), libArena: Arena = Arena.ofAuto())
-            = Dut(stateArena.allocate((NUM_STATE_BYTES)), library(libArena))
+        fun instance(stateArena: Arena = Arena.ofAuto(), libName: String, libArena: Arena = Arena.ofAuto()) =
+            Dut(stateArena.allocate((NUM_STATE_BYTES)), library(libName, libArena))
     }
 
 }
@@ -105,13 +132,15 @@ class Dut(
 abstract class ModuleLibrary(
     val name: String,
     val arena: Arena,
-    val evalFnSym: String = "${name}_eval",
-    val initialFnSym: String = "",
-    val finalFnSym: String = "",
+    val evalFnSym: String,
+    val initialFnSym: String,
+    val finalFnSym: String,
 ) {
     val libraryName: String = System.mapLibraryName(name)
 
-    val symbolLookup: SymbolLookup = SymbolLookup.libraryLookup(libraryName, arena).or(SymbolLookup.loaderLookup())
+    val symbolLookup: SymbolLookup = SymbolLookup
+        .libraryLookup(libraryName, arena)
+        .or(SymbolLookup.loaderLookup())
         .or(Linker.nativeLinker().defaultLookup())
 
     abstract val evalFunctionHandle: MethodHandle
@@ -119,7 +148,6 @@ abstract class ModuleLibrary(
     abstract val initialFunctionHandle: MethodHandle
 
     abstract val finalFunctionHandle: MethodHandle
-
 
     protected fun functionHandle(symbolName: String): MethodHandle {
         val symbol: MemorySegment = symbolLookup.find(symbolName).orElseThrow {
@@ -133,7 +161,6 @@ abstract class ModuleLibrary(
     protected fun stubFunctionHandle(reason: String): MethodHandle {
         TODO("Undefined symbol: $reason")
     }
-
 }
 
 

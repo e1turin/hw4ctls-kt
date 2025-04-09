@@ -24,7 +24,6 @@ kotlin {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         mainRun {
             mainClass = "io.github.e1turin.cirkt.Main"
-//            mainClass = "io.github.e1turin.cirkt.HelloKt"
         }
     }
     linuxX64 {

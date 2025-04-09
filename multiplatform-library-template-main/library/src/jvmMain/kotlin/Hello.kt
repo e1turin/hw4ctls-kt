@@ -25,6 +25,34 @@ fun playWithFFM() {
     println("\n - - - \n")
 
     rawFFM()
+
+    println("\n - - - \n")
+
+    myFfmWrapper()
+}
+
+private fun myFfmWrapper() {
+    Arena.ofConfined().use { arena ->
+        val dut = Dut.instance(arena, "model")
+
+        dut.reset = 1
+        for (i in 0..10) {
+            dut.clk = 1
+            dut.eval()
+            dut.clk = 0
+            dut.eval()
+        }
+
+        dut.reset = 0
+        for (i in 0..10) {
+            dut.clk = 1
+            dut.eval()
+            dut.clk = 0
+            dut.eval()
+        }
+
+        println("dut.o = ${dut.o} = ${dut.internal.o}")
+    }
 }
 
 private fun rawFFM() {

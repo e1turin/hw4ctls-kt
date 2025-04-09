@@ -8,11 +8,13 @@ class Main {
         @JvmStatic
         fun main(args: Array<String>) {
 //            val json = this::class.java.getResource("model-states.json")?.readText()
-            val json = File("src/jvmMain/resources/arcilator/model-states.json").readText()
+//            val json = File("src/jvmMain/resources/arcilator/model-states.json").readText()
+//
+//            val models: StateFile = Json.decodeFromString(json)
+//
+//            println(models[0])
 
-            val models: StateFile = Json.decodeFromString(json)
-
-            println(models[0])
+            playWithFFM()
         }
     }
 }
