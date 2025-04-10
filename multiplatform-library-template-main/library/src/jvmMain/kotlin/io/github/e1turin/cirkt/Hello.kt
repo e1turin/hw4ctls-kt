@@ -2,6 +2,7 @@ package io.github.e1turin.cirkt
 
 import io.github.e1turin.cirkt.jextracted.State
 import io.github.e1turin.cirkt.jextracted.dut_h
+import io.github.e1turin.cirkt.state.DumpStateVisitor
 import java.lang.foreign.Arena
 import java.lang.foreign.FunctionDescriptor
 import java.lang.foreign.Linker
@@ -32,33 +33,33 @@ fun playWithFFM() {
 
     println("\n - - - \n")
 
-    generatedFfmWrapper()
+//    generatedFfmWrapper()
 }
 
-private fun generatedFfmWrapper() {
-    println("Hello generated FFM World!")
-    Arena.ofConfined().use { arena ->
-        val dut = io.github.e1turin.cirkt.generated.Dut.instance(arena, "model")
-
-        dut.reset = 1
-        for (i in 0..10) {
-            dut.clk = 1
-            dut.eval()
-            dut.clk = 0
-            dut.eval()
-        }
-
-        dut.reset = 0
-        for (i in 0..10) {
-            dut.clk = 1
-            dut.eval()
-            dut.clk = 0
-            dut.eval()
-        }
-
-        println("dut.o=${dut.o}")
-    }
-}
+//private fun generatedFfmWrapper() {
+//    println("Hello generated FFM World!")
+//    Arena.ofConfined().use { arena ->
+//        val dut = io.github.e1turin.cirkt.generated.Dut.instance(arena, "model")
+//
+//        dut.reset = 1
+//        for (i in 0..10) {
+//            dut.clk = 1
+//            dut.eval()
+//            dut.clk = 0
+//            dut.eval()
+//        }
+//
+//        dut.reset = 0
+//        for (i in 0..10) {
+//            dut.clk = 1
+//            dut.eval()
+//            dut.clk = 0
+//            dut.eval()
+//        }
+//
+//        println("dut.o=${dut.o}")
+//    }
+//}
 
 private fun myFfmWrapper() {
     println("Hello my FFM World!")
@@ -82,6 +83,22 @@ private fun myFfmWrapper() {
         }
 
         println("dut.o=${dut.o}")
+
+        dut.dumpStateTo(object : DumpStateVisitor {
+            override fun dumpStateByte(name: String, value: Byte) {
+                println("$name: $value")
+            }
+
+            override fun dumpStateShort(name: String, value: Short) = TODO("Not yet implemented")
+            override fun dumpStateInt(name: String, value: Int) = TODO("Not yet implemented")
+            override fun dumpStateLong(name: String, value: Long) = TODO("Not yet implemented")
+            override fun dumpStateFloat(name: String, value: Float) = TODO("Not yet implemented")
+            override fun dumpStateDouble(name: String, value: Double) = TODO("Not yet implemented")
+            override fun dumpStateBoolean(name: String, value: Boolean) = TODO("Not yet implemented")
+            override fun dumpStateChar(name: String, value: Char) = TODO("Not yet implemented")
+            override fun dumpStateString(name: String, value: String) = TODO("Not yet implemented")
+
+        })
     }
 }
 

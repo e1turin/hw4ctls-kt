@@ -1,5 +1,6 @@
 package io.github.e1turin.cirkt
 
+import io.github.e1turin.cirkt.state.*
 import java.lang.foreign.*
 import java.lang.invoke.MethodHandle
 
@@ -25,7 +26,7 @@ class Dut(
     //        "numBits": 1,
     //        "type": "input"
     //      },
-    var clk by memoryAccess<Byte>(0, StateType.INPUT)
+    var clk by input<Byte>(0)
 
     //      {
     //        "name": "reset",
@@ -33,18 +34,18 @@ class Dut(
     //        "numBits": 1,
     //        "type": "input"
     //      },
-    var reset: Byte by memoryAccess<Byte>(1, StateType.INPUT)
+    var reset: Byte by input<Byte>(1)
 
     val internal = InternalStates()
 
-    inner class InternalStates {
+    inner class InternalStates : Stateful("$stateGroupName.internal") {
         //      {
         //        "name": "clk",
         //        "offset": 2,
         //        "numBits": 1,
         //        "type": "wire"
         //      },
-        var clk: Byte by memoryAccess<Byte>(2, StateType.WIRE)
+        var clk: Byte by wire<Byte>(2)
 
         //      {
         //        "name": "reset",
@@ -52,7 +53,7 @@ class Dut(
         //        "numBits": 1,
         //        "type": "wire"
         //      },
-        var reset: Byte by memoryAccess<Byte>(3, StateType.WIRE)
+        var reset: Byte by wire<Byte>(3)
 
         //      {
         //        "name": "reg",
@@ -60,7 +61,7 @@ class Dut(
         //        "numBits": 8,
         //        "type": "register"
         //      },
-        var reg: Byte by memoryAccess<Byte>(5, StateType.REGISTER)
+        var reg: Byte by register<Byte>(5)
 
         //      {
         //        "name": "o",
@@ -68,7 +69,7 @@ class Dut(
         //        "numBits": 8,
         //        "type": "wire"
         //      },
-        var o: Byte by memoryAccess<Byte>(6, StateType.WIRE)
+        var o: Byte by wire<Byte>(6)
     }
 
     //      {
@@ -77,7 +78,7 @@ class Dut(
     //        "numBits": 8,
     //        "type": "output"
     //      }
-    var o: Byte by memoryAccess<Byte>(7, StateType.OUTPUT)
+    var o: Byte by output<Byte>(7)
 
     fun eval() {
         lib.evalFunctionHandle.invokeExact(state)
@@ -91,16 +92,10 @@ class Dut(
         lib.finalFunctionHandle.invokeExact(state)
     }
 
-
-    fun dump() = State(
-        clk,
-        reset,
-        internal.clk,
-        internal.reset,
-        internal.reg,
-        internal.o,
-        o
-    )
+    override fun dumpStateTo(visitor: DumpStateVisitor) {
+        super.dumpStateTo(visitor)
+        internal.dumpStateTo(visitor)
+    }
 
     companion object {
         //    "numStateBytes": 8,

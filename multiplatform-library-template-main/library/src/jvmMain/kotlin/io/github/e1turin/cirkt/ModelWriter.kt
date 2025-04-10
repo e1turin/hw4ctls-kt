@@ -1,7 +1,6 @@
 package io.github.e1turin.cirkt
 
 import com.squareup.kotlinpoet.*
-import java.io.File
 
 fun Appendable.writeModel(packageName: String, model: ModelInfo) {
     val modelClass = ClassName(packageName, model.name)

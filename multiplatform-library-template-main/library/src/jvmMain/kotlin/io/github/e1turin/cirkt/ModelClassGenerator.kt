@@ -3,7 +3,7 @@ package io.github.e1turin.cirkt.generator
 import com.squareup.kotlinpoet.*
 import io.github.e1turin.cirkt.ModelInfo
 import io.github.e1turin.cirkt.StateInfo
-import io.github.e1turin.cirkt.StateType
+import io.github.e1turin.cirkt.state.StateType
 import java.nio.file.Paths
 
 class ModelClassGenerator {
@@ -63,7 +63,7 @@ class ModelClassGenerator {
                         getTypeForNumBits(state.numBits),
                         state.offset,
                         StateType::class,
-                        state.type.name
+                        state.type
                     )
                 )
                 .build()
@@ -108,7 +108,7 @@ class ModelClassGenerator {
                                 getTypeForNumBits(state.numBits),
                                 state.offset,
                                 StateType::class,
-                                state.type.name
+                                state.type
                             )
                         )
                         .build()
