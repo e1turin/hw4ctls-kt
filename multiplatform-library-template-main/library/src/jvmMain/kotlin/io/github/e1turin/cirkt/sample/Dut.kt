@@ -1,5 +1,8 @@
-package io.github.e1turin.cirkt
+package io.github.e1turin.cirkt.sample
 
+import io.github.e1turin.cirkt.Model
+import io.github.e1turin.cirkt.ModelLibrary
+import io.github.e1turin.cirkt.Stateful
 import io.github.e1turin.cirkt.state.*
 import java.lang.foreign.*
 import java.lang.invoke.MethodHandle
@@ -119,6 +122,4 @@ class Dut(
         fun instance(stateArena: Arena, libName: String, libArena: Arena = Arena.ofAuto()) =
             Dut(stateArena.allocate((NUM_STATE_BYTES)), library(libName, libArena))
     }
-
 }
-

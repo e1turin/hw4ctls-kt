@@ -2,6 +2,7 @@ package io.github.e1turin.cirkt
 
 import io.github.e1turin.cirkt.jextracted.State
 import io.github.e1turin.cirkt.jextracted.dut_h
+import io.github.e1turin.cirkt.sample.Dut
 import io.github.e1turin.cirkt.state.DumpStateVisitor
 import java.lang.foreign.Arena
 import java.lang.foreign.FunctionDescriptor
@@ -66,21 +67,24 @@ private fun myFfmWrapper() {
     Arena.ofConfined().use { arena ->
         val dut = Dut.instance(arena, "model")
 
-        dut.reset = 1
-        for (i in 0..10) {
-            dut.clk = 1
-            dut.eval()
-            dut.clk = 0
-            dut.eval()
+        fun Dut.step(times: Int = 1) {
+            for (i in 1..times) {
+                clk = 1
+                eval()
+                clk = 0
+                eval()
+            }
         }
 
-        dut.reset = 0
-        for (i in 0..10) {
-            dut.clk = 1
-            dut.eval()
-            dut.clk = 0
-            dut.eval()
+        fun Dut.reset(steps: Int = 0) {
+            reset = 1
+            eval()
+            step(steps)
+            reset = 0
         }
+
+        dut.reset(10)
+        dut.step(10)
 
         println("dut.o=${dut.o}")
 
@@ -88,16 +92,6 @@ private fun myFfmWrapper() {
             override fun dumpStateByte(name: String, value: Byte) {
                 println("$name: $value")
             }
-
-            override fun dumpStateShort(name: String, value: Short) = TODO("Not yet implemented")
-            override fun dumpStateInt(name: String, value: Int) = TODO("Not yet implemented")
-            override fun dumpStateLong(name: String, value: Long) = TODO("Not yet implemented")
-            override fun dumpStateFloat(name: String, value: Float) = TODO("Not yet implemented")
-            override fun dumpStateDouble(name: String, value: Double) = TODO("Not yet implemented")
-            override fun dumpStateBoolean(name: String, value: Boolean) = TODO("Not yet implemented")
-            override fun dumpStateChar(name: String, value: Char) = TODO("Not yet implemented")
-            override fun dumpStateString(name: String, value: String) = TODO("Not yet implemented")
-
         })
     }
 }
