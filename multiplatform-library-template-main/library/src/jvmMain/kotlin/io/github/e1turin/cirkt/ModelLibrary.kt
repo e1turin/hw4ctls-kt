@@ -29,14 +29,10 @@ abstract class ModelLibrary(
 
     protected fun functionHandle(symbolName: String): MethodHandle {
         val symbol: MemorySegment = symbolLookup.find(symbolName).orElseThrow {
-            UnsatisfiedLinkError("unresolved symbol: $symbolName")
+            UnsatisfiedLinkError("unresolved symbol: '$symbolName'")
         }
         val descriptor = FunctionDescriptor.ofVoid(ValueLayout.ADDRESS)
         val handle = Linker.nativeLinker().downcallHandle(symbol, descriptor)
         return handle
-    }
-
-    protected fun stubFunctionHandle(reason: String): MethodHandle {
-        TODO("Undefined symbol: $reason")
     }
 }

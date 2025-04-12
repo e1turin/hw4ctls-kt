@@ -1,7 +1,7 @@
 package io.github.e1turin.cirkt
 
 import io.github.e1turin.cirkt.arcilator.StateFile
-import io.github.e1turin.cirkt.generator.ModelClassGenerator
+import io.github.e1turin.cirkt.generator.generate
 import kotlinx.serialization.json.Json
 import java.io.File
 
@@ -16,7 +16,7 @@ class Main {
 
             println(models[0])
 
-            ModelClassGenerator().generate(models[0], "src/jvmMain/kotlin")
+            generate(models[0], "src/jvmMain/kotlin", "io.github.e1turin.cirkt.generated")
 
             playWithFFM()
         }

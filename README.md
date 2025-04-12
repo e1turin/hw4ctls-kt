@@ -238,16 +238,19 @@ Dut.o=11
  - - - 
 
 Hello my FFM World!
-dut.o=11
+dut.o=10
 Dut.clk: 0
 Dut.reset: 0
-Dut.o: 11
+Dut.o: 10
 Dut.internal.clk: 0
 Dut.internal.reset: 0
-Dut.internal.reg: 11
-Dut.internal.o: 11
+Dut.internal.reg: 10
+Dut.internal.o: 10
 
  - - - 
+
+Hello generated FFM World!
+dut.o=10
 
 ```
 

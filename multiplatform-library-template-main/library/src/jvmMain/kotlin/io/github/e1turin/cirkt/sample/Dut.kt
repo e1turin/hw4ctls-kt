@@ -19,8 +19,6 @@ open class Dut(
     lib: ModelLibrary
 ) : Model(MODEL_NAME, state, lib, NUM_STATE_BYTES) {
 
-    constructor(arena: Arena, lib: ModelLibrary) : this(arena.allocate(NUM_STATE_BYTES), lib)
-
     /*
      * {
      *   "name": "clk",
@@ -109,6 +107,11 @@ open class Dut(
 
         /* "numStateBytes": 8, */
         const val NUM_STATE_BYTES: Long = 8
+
+        fun instance(arena: Arena, libraryName: String, libraryArena: Arena = Arena.ofAuto()): Dut = Dut(
+            arena.allocate(NUM_STATE_BYTES),
+            DutLibrary(libraryName, libraryArena)
+        )
     }
 }
 
@@ -122,9 +125,12 @@ class DutLibrary(name: String, arena: Arena = Arena.ofAuto()) : ModelLibrary(
     /* "finalFnSym": "", */
     finalFnSym = ""
 ) {
-    override val evalFunctionHandle: MethodHandle = functionHandle(evalFnSym)
-    override val initialFunctionHandle: MethodHandle by lazy { stubFunctionHandle("initialFnSym is blank: '$initialFnSym'") }
-    override val finalFunctionHandle: MethodHandle by lazy { stubFunctionHandle("finalFnSym is blank: '$finalFnSym'") }
+    override val evalFunctionHandle: MethodHandle
+        get() = functionHandle(evalFnSym)
+    override val initialFunctionHandle: MethodHandle
+        get() = throw NotImplementedError("No such symbol")
+    override val finalFunctionHandle: MethodHandle
+        get() = TODO("Not yet implemented")
 }
 
 // move to object?

@@ -1,229 +1,203 @@
 package io.github.e1turin.cirkt.generator
 
 import com.squareup.kotlinpoet.*
-import io.github.e1turin.cirkt.ModelInfo
-import io.github.e1turin.cirkt.StateInfo
-import io.github.e1turin.cirkt.state.StateType
+import io.github.e1turin.cirkt.Model
+import io.github.e1turin.cirkt.ModelLibrary
+import io.github.e1turin.cirkt.arcilator.ModelInfo
+import io.github.e1turin.cirkt.arcilator.StateInfo
+import io.github.e1turin.cirkt.state.StateProjectionType
+import java.lang.foreign.Arena
+import java.lang.foreign.MemorySegment
+import java.lang.invoke.MethodHandle
 import java.nio.file.Paths
 
-class ModelClassGenerator {
-    fun generate(modelInfo: ModelInfo, outputDir: String) {
-        val className = modelInfo.name.replaceFirstChar { it.uppercase() }
-        val fileSpec = FileSpec.builder("io.github.e1turin.cirkt.generated", className)
-            .addImport("java.lang.invoke", "MethodHandle") // Add this
-            .addImport("io.github.e1turin.cirkt", "memoryAccess") // Add this
-            .addType(generateClass(modelInfo))
-            .build()
-        fileSpec.writeTo(Paths.get(outputDir))
-    }
+fun generate(modelInfo: ModelInfo, outputDir: String, packageName: String = "") {
+    val modelName = modelInfo.name.replaceFirstChar { it.uppercase() }
+    val modelLibraryName = "${modelName}Library"
 
-    private fun generateClass(modelInfo: ModelInfo): TypeSpec {
-        val className = modelInfo.name.replaceFirstChar { it.uppercase() }
-        val (topLevelProperties, internalProperties) = modelInfo.states.partition {
-            it.type == StateType.INPUT || it.type == StateType.OUTPUT
+    val companion = TypeSpec.companionObjectBuilder()
+        .addProperty(
+            PropertySpec.builder("MODEL_NAME", String::class)
+                .addModifiers(KModifier.CONST)
+                .initializer("%S", modelInfo.name)
+                .build()
+        )
+        .addProperty(
+            PropertySpec.builder("NUM_STATE_BYTES", Long::class)
+                .addModifiers(KModifier.CONST)
+                .initializer("%LL", modelInfo.numStateBytes)
+                .build()
+        )
+        .addFunction(
+            FunSpec.builder("instance")
+                .addParameter(ParameterSpec.builder("arena", Arena::class).build())
+                .addParameter(ParameterSpec.builder("libraryName", String::class).build())
+                .addParameter(
+                    ParameterSpec.builder("libraryArena", Arena::class)
+                        .defaultValue("%L", "Arena.ofAuto()")
+                        .build()
+                )
+                .returns(
+                    ClassName(packageName, modelName),
+                )
+                .addStatement("return ${modelName}(arena.allocate(NUM_STATE_BYTES), $modelLibraryName(libraryName, libraryArena))")
+                .build()
+        )
+        .build()
+
+    val modelClass = TypeSpec.classBuilder(modelName)
+        .addModifiers(KModifier.OPEN)
+        .primaryConstructor(
+            FunSpec.constructorBuilder()
+                .addParameter("state", MemorySegment::class)
+                .addParameter("lib", ModelLibrary::class)
+                .build()
+        )
+        .superclass(Model::class).apply {
+            addSuperclassConstructorParameter("%L", "MODEL_NAME")
+            addSuperclassConstructorParameter("state")
+            addSuperclassConstructorParameter("lib")
+            addSuperclassConstructorParameter("%L", "NUM_STATE_BYTES")
         }
-
-        return TypeSpec.classBuilder(className)
-            .addModifiers(KModifier.OPEN)
-            .primaryConstructor(
-                FunSpec.constructorBuilder()
-                    .addParameter("state", MEMORY_SEGMENT)
-                    .addParameter("lib", MODEL_LIBRARY)
-                    .build()
+        .addProperties(modelInfo.states.map { stateProjectionPropSpec(it) })
+        .addFunctions(
+            listOf(
+                evalFunctionSpec(),
+                initialFunctionSpec(),
+                finalFunctionSpec()
             )
-            .superclass(MODEL)
-            .addSuperclassConstructorParameter("%S", modelInfo.name)
-            .addSuperclassConstructorParameter("state")
-            .addSuperclassConstructorParameter("lib")
-            .addSuperclassConstructorParameter("%L", modelInfo.numStateBytes)
-            .addProperties(generateProperties(topLevelProperties))
-            .addType(generateInternalClass(internalProperties))
-            .addType(generateStateDataClass(modelInfo)) // 1. State data class
-            .addProperty( // 2. InternalStates instance
-                PropertySpec.builder("internal", ClassName("", "InternalStates"))
-                    .initializer("InternalStates()")
-                    .build()
-            )
-            .addFunctions(listOf( // Add missing functions
-                generateEvalFunction(),
-                generateInitialFunction(),
-                generateFinalFunction()
-            ))
-            .addFunction(generateDumpFunction(modelInfo))
-            .addType(generateCompanionObject(modelInfo))
-            .build()
-    }
+        )
+        .addType(companion)
+        .build()
 
-    private fun generateProperties(states: List<StateInfo>): List<PropertySpec> {
-        return states.map { state ->
-            PropertySpec.builder(state.name.decapitalize(), getTypeForNumBits(state.numBits))
-                .mutable(state.type == StateType.INPUT)
-                .delegate(
-                    CodeBlock.of("memoryAccess<%T>(%L, %T.%L)",
-                        getTypeForNumBits(state.numBits),
-                        state.offset,
-                        StateType::class,
-                        state.type
-                    )
+    val modelLibraryClass = TypeSpec.classBuilder(modelLibraryName)
+        .addModifiers(KModifier.OPEN)
+        .primaryConstructor(
+            FunSpec.constructorBuilder()
+                .addParameter("name", String::class)
+                .addParameter(
+                    ParameterSpec.builder("arena", Arena::class)
+                        .defaultValue("%L", "Arena.ofAuto()")
+                        .build()
                 )
                 .build()
-        }
-    }
-
-    private fun generateStateDataClass(modelInfo: ModelInfo): TypeSpec {
-        val properties = modelInfo.states.map { state ->
-            val propName = when (state.type) {
-                StateType.INPUT, StateType.OUTPUT -> state.name
-                else -> "internal${state.name.replaceFirstChar { it.uppercase() }}"
-            }
-            PropertySpec.builder(propName, getTypeForNumBits(state.numBits))
-                .initializer(propName)
+        )
+        .superclass(ModelLibrary::class).apply {
+            addSuperclassConstructorParameter("name")
+            addSuperclassConstructorParameter("arena")
+            addSuperclassConstructorParameter("\"${modelInfo.name}_eval\"")
+            addSuperclassConstructorParameter("\"${modelInfo.initialFnSym}\"")
+            addSuperclassConstructorParameter("\"${modelInfo.finalFnSym}\"")
+        }.addProperty(
+            PropertySpec.builder("evalFunctionHandle", MethodHandle::class)
+                .initializer(CodeBlock.builder().addStatement("%L", "functionHandle(evalFnSym)").build())
+                .addModifiers(KModifier.OVERRIDE)
                 .build()
-        }
-
-        return TypeSpec.classBuilder("State")
-            .addModifiers(KModifier.DATA)
-            .primaryConstructor(
-                FunSpec.constructorBuilder()
-                    .addParameters(
-                        properties.map { prop ->
-                            ParameterSpec.builder(prop.name, prop.type).build()
-                        }
-                    )
-                    .build()
-            )
-            .addProperties(properties)
-            .build()
-    }
-
-    private fun generateInternalClass(states: List<StateInfo>): TypeSpec {
-        return TypeSpec.classBuilder("InternalStates")
-            .addModifiers(KModifier.INNER)
-            .addProperties(
-                states.map { state ->
-                    PropertySpec.builder(state.name.decapitalize(), getTypeForNumBits(state.numBits))
-                        .mutable(true)
-                        .delegate(
-                            CodeBlock.of("memoryAccess<%T>(%L, %T.%L)",
-                                getTypeForNumBits(state.numBits),
-                                state.offset,
-                                StateType::class,
-                                state.type
-                            )
+        )
+        .addProperty(
+            PropertySpec.builder("initialFunctionHandle", MethodHandle::class)
+                .apply {
+                    if (modelInfo.initialFnSym.isNotEmpty()) {
+                        initializer(
+                            CodeBlock.builder().addStatement("%L", "functionHandle(initialFnSym)").build()
                         )
-                        .build()
+                    } else {
+                        getter(
+                            FunSpec.getterBuilder()
+                                .addCode(
+                                    CodeBlock.builder()
+                                        .add("throw NotImplementedError(\"No such symbol '\$initialFnSym'\")").build()
+                                )
+                                .build()
+                        )
+                    }
                 }
-            )
-            .build()
-    }
+                .addModifiers(KModifier.OVERRIDE)
+                .build()
+        )
+        .addProperty(
+            PropertySpec.builder("finalFunctionHandle", MethodHandle::class)
+                .apply {
+                    if (modelInfo.finalFnSym.isNotEmpty()) {
+                        initializer(
+                            CodeBlock.builder().addStatement("%L", "functionHandle(finalFnSym)").build()
+                        )
+                    } else {
+                        getter(
+                            FunSpec.getterBuilder()
+                                .addCode(
+                                    CodeBlock.builder()
+                                        .add("throw NotImplementedError(\"No such symbol '\$finalFnSym'\")").build()
+                                )
+                                .build()
+                        )
+                    }
+                }
+                .addModifiers(KModifier.OVERRIDE)
+                .build()
+        )
+        .build()
 
-    private fun generateDumpFunction(modelInfo: ModelInfo): FunSpec {
-        val params = modelInfo.states.map { state ->
-            when (state.type) {
-                StateType.INPUT, StateType.OUTPUT -> state.name
-                else -> "internal.${state.name}"
-            }
-        }
-        return FunSpec.builder("dump")
-            .returns(ClassName("", "State"))
-            .addStatement("return State(%L)", params.joinToString())
-            .build()
-    }
-
-    private fun generateCompanionObject(modelInfo: ModelInfo): TypeSpec {
-        return TypeSpec.companionObjectBuilder()
-            .addProperty(
-                PropertySpec.builder("NUM_STATE_BYTES", LONG)
-                    .addModifiers(KModifier.CONST)
-                    .initializer("%LL", modelInfo.numStateBytes)
-                    .build()
-            )
-            .addFunction(generateLibraryFunction(modelInfo))
-            .addFunction(generateInstanceFunction(modelInfo))
-            .build()
-    }
-
-    private fun generateLibraryFunction(modelInfo: ModelInfo): FunSpec {
-        return FunSpec.builder("library")
-            .addParameter("name", STRING)
-            .addParameter("arena", ARENA)
-            .returns(MODEL_LIBRARY)
-            .addCode(
-                CodeBlock.builder()
-                    .add("return object : ModelLibrary(name, arena, %S, %S, %S) {\n",
-                        "${modelInfo.name}_eval",
-                        modelInfo.initialFnSym,
-                        modelInfo.finalFnSym
-                    )
-                    .indent()
-                    .addStatement("override val evalFunctionHandle: MethodHandle = functionHandle(evalFnSym)")
-                    .beginControlFlow("override val initialFunctionHandle: MethodHandle by lazy")
-                    .addStatement("stubFunctionHandle(%S)", "initialFnSym is blank: '\$initialFnSym'")
-                    .endControlFlow()
-                    .beginControlFlow("override val finalFunctionHandle: MethodHandle by lazy")
-                    .addStatement("stubFunctionHandle(%S)", "finalFnSym is blank: '\$finalFnSym'")
-                    .endControlFlow()
-                    .unindent()
-                    .add("}\n")
-                    .build()
-            )
-            .build()
-    }
-
-    private fun generateInstanceFunction(modelInfo: ModelInfo): FunSpec {
-        return FunSpec.builder("instance")
-            .addParameter(
-                ParameterSpec.builder("stateArena", ARENA)
-                    .defaultValue("%T.ofAuto()", ARENA)
-                    .build()
-            )
-            .addParameter("libName", STRING)
-            .addParameter(
-                ParameterSpec.builder("libArena", ARENA)
-                    .defaultValue("%T.ofAuto()", ARENA)
-                    .build()
-            )
-            .returns(ClassName("", modelInfo.name))
-            .addStatement(
-                "return %T(stateArena.allocate(NUM_STATE_BYTES), library(libName, libArena))",
-                ClassName("", modelInfo.name)
-            )
-            .build()
-    }
-
-    private fun generateEvalFunction(): FunSpec =
-        FunSpec.builder("eval")
-            .addStatement("lib.evalFunctionHandle.invokeExact(state)")
-            .build()
-
-    private fun generateInitialFunction(): FunSpec =
-        FunSpec.builder("initial")
-            .addStatement("lib.initialFunctionHandle.invokeExact(state)")
-            .build()
-
-    private fun generateFinalFunction(): FunSpec =
-        FunSpec.builder("final")
-            .addStatement("lib.finalFunctionHandle.invokeExact(state)")
-            .build()
-
-    private fun getTypeForNumBits(numBits: UInt): TypeName = when {
-        numBits <= 8u -> BYTE
-        numBits <= 16u -> SHORT
-        numBits <= 32u -> INT
-        numBits <= 64u -> LONG
-        else -> throw IllegalArgumentException("Unsupported numBits: $numBits")
-    }
-
-    companion object {
-        private val MEMORY_SEGMENT = ClassName("java.lang.foreign", "MemorySegment")
-        private val MODEL_LIBRARY = ClassName("io.github.e1turin.cirkt", "ModelLibrary")
-        private val MODEL = ClassName("io.github.e1turin.cirkt", "Model")
-        private val ARENA = ClassName("java.lang.foreign", "Arena")
-        private val METHOD_HANDLE = ClassName("java.lang.invoke", "MethodHandle")
-        private val STRING = String::class.asClassName()
-        private val LONG = Long::class.asClassName()
-        private val BYTE = Byte::class.asClassName()
-        private val SHORT = Short::class.asClassName()
-        private val INT = Int::class.asClassName()
-    }
+    val className = modelInfo.name.replaceFirstChar { it.uppercase() }
+    val fileSpec = FileSpec.builder(packageName, className)
+        .addType(modelClass)
+        .addType(modelLibraryClass)
+        .build()
+    fileSpec.writeTo(Paths.get(outputDir))
 }
+
+private fun stateProjectionPropSpec(state: StateInfo): PropertySpec {
+    val stateProjectionName = if (state.type in listOf(StateProjectionType.INPUT, StateProjectionType.OUTPUT)) {
+        state.name.replaceFirstChar { it.lowercase() }
+    } else {
+        "internal" + state.name.replaceFirstChar { it.uppercase() }
+    }
+    val delegate = when (state.type) {
+        StateProjectionType.INPUT -> STATE_DELEGATE_INPUT
+        StateProjectionType.OUTPUT -> STATE_DELEGATE_OUTPUT
+        StateProjectionType.REGISTER -> STATE_DELEGATE_REGISTER
+        StateProjectionType.MEMORY -> STATE_DELEGATE_MEMORY
+        StateProjectionType.WIRE -> STATE_DELEGATE_WIRE
+    }
+    return PropertySpec.builder(stateProjectionName, getTypeForNumBits(state.numBits))
+        .addModifiers(KModifier.OPEN)
+        .mutable(state.type == StateProjectionType.INPUT)
+        .delegate(
+            CodeBlock.of(
+                "%M<%T>(%L)",
+                delegate,
+                getTypeForNumBits(state.numBits),
+                state.offset,
+            )
+        )
+        .build()
+}
+
+private fun evalFunctionSpec(): FunSpec =
+    FunSpec.builder("eval")
+        .addStatement("lib.evalFunctionHandle.invokeExact(state)")
+        .build()
+
+private fun initialFunctionSpec(): FunSpec =
+    FunSpec.builder("initial")
+        .addStatement("lib.initialFunctionHandle.invokeExact(state)")
+        .build()
+
+private fun finalFunctionSpec(): FunSpec =
+    FunSpec.builder("final")
+        .addStatement("lib.finalFunctionHandle.invokeExact(state)")
+        .build()
+
+private fun getTypeForNumBits(numBits: UInt): TypeName = when {
+    numBits <= 8u -> BYTE
+    numBits <= 16u -> SHORT
+    numBits <= 32u -> INT
+    numBits <= 64u -> LONG
+    else -> throw IllegalArgumentException("Unsupported numBits: $numBits")
+}
+
+private val STATE_DELEGATE_INPUT = MemberName("io.github.e1turin.cirkt.state", "input")
+private val STATE_DELEGATE_OUTPUT = MemberName("io.github.e1turin.cirkt.state", "output")
+private val STATE_DELEGATE_REGISTER = MemberName("io.github.e1turin.cirkt.state", "register")
+private val STATE_DELEGATE_MEMORY = MemberName("io.github.e1turin.cirkt.state", "memory")
+private val STATE_DELEGATE_WIRE = MemberName("io.github.e1turin.cirkt.state", "wire")

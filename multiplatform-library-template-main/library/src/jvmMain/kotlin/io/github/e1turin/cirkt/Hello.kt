@@ -35,38 +35,41 @@ fun playWithFFM() {
 
     println("\n - - - \n")
 
-//    generatedFfmWrapper()
+    generatedFfmWrapper()
 }
 
-//private fun generatedFfmWrapper() {
-//    println("Hello generated FFM World!")
-//    Arena.ofConfined().use { arena ->
-//        val dut = io.github.e1turin.cirkt.generated.Dut.instance(arena, "model")
-//
-//        dut.reset = 1
-//        for (i in 0..10) {
-//            dut.clk = 1
-//            dut.eval()
-//            dut.clk = 0
-//            dut.eval()
-//        }
-//
-//        dut.reset = 0
-//        for (i in 0..10) {
-//            dut.clk = 1
-//            dut.eval()
-//            dut.clk = 0
-//            dut.eval()
-//        }
-//
-//        println("dut.o=${dut.o}")
-//    }
-//}
+private fun generatedFfmWrapper() {
+    println("Hello generated FFM World!")
+    Arena.ofConfined().use { arena ->
+        val dut = io.github.e1turin.cirkt.generated.Dut.instance(arena, "model")
+
+        fun io.github.e1turin.cirkt.generated.Dut.step(times: Int = 1) {
+            for (i in 1..times) {
+                clk = 1
+                eval()
+                clk = 0
+                eval()
+            }
+        }
+
+        fun io.github.e1turin.cirkt.generated.Dut.reset(steps: Int = 0) {
+            reset = 1
+            eval()
+            step(steps)
+            reset = 0
+        }
+
+        dut.reset(10)
+        dut.step(10)
+
+        println("dut.o=${dut.o}")
+    }
+}
 
 private fun myFfmWrapper() {
     println("Hello my FFM World!")
     Arena.ofConfined().use { arena ->
-        val dut = Dut(arena, DutLibrary("model"))
+        val dut = Dut.instance(arena, "model")
 
         fun Dut.step(times: Int = 1) {
             for (i in 1..times) {
