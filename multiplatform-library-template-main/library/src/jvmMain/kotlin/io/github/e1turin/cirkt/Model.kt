@@ -1,10 +1,7 @@
 package io.github.e1turin.cirkt
 
+import io.github.e1turin.cirkt.state.Stateful
 import java.lang.foreign.MemorySegment
-
-interface Stateful {
-    val state: MemorySegment
-}
 
 abstract class Model(
     val name: String,

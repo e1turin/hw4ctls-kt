@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
  * Permalink: https://github.com/llvm/circt/blob/d675c243c04339563517de1717dacbe3aa8309d5/lib/Dialect/Arc/ModelInfo.cpp#L130C3-L171C6
  */
 @Serializable
-enum class StateType {
+enum class StateProjectionType {
 
     @SerialName("input")
     INPUT,

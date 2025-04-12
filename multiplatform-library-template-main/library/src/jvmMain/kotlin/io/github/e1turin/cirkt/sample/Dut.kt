@@ -2,7 +2,11 @@ package io.github.e1turin.cirkt.sample
 
 import io.github.e1turin.cirkt.Model
 import io.github.e1turin.cirkt.ModelLibrary
-import io.github.e1turin.cirkt.state.*
+import io.github.e1turin.cirkt.StateDumper
+import io.github.e1turin.cirkt.state.input
+import io.github.e1turin.cirkt.state.output
+import io.github.e1turin.cirkt.state.register
+import io.github.e1turin.cirkt.state.wire
 import java.lang.foreign.*
 import java.lang.invoke.MethodHandle
 
@@ -102,6 +106,7 @@ open class Dut(
     companion object {
         /* "name": "Dut", */
         const val MODEL_NAME: String = "Dut"
+
         /* "numStateBytes": 8, */
         const val NUM_STATE_BYTES: Long = 8
     }

@@ -1,5 +1,6 @@
 package io.github.e1turin.cirkt
 
+import io.github.e1turin.cirkt.arcilator.StateFile
 import io.github.e1turin.cirkt.generator.ModelClassGenerator
 import kotlinx.serialization.json.Json
 import java.io.File

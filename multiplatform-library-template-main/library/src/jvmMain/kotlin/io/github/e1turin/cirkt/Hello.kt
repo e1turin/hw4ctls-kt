@@ -5,7 +5,6 @@ import io.github.e1turin.cirkt.jextracted.dut_h
 import io.github.e1turin.cirkt.sample.Dut
 import io.github.e1turin.cirkt.sample.DutLibrary
 import io.github.e1turin.cirkt.sample.dumpTo
-import io.github.e1turin.cirkt.state.StateDumper
 import java.lang.foreign.Arena
 import java.lang.foreign.FunctionDescriptor
 import java.lang.foreign.Linker

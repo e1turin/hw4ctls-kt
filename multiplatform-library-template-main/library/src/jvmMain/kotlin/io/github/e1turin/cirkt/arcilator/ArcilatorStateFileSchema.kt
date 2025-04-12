@@ -1,6 +1,6 @@
-package io.github.e1turin.cirkt
+package io.github.e1turin.cirkt.arcilator
 
-import io.github.e1turin.cirkt.state.StateType
+import io.github.e1turin.cirkt.state.StateProjectionType
 import kotlinx.serialization.Serializable
 
 
@@ -53,7 +53,7 @@ data class ModelInfo(
  */
 @Serializable
 data class StateInfo(
-    val type: StateType,
+    val type: StateProjectionType,
     val name: String,
     val offset: UInt,
     val numBits: UInt,

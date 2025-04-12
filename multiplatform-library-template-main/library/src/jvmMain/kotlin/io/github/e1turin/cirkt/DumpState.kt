@@ -1,4 +1,4 @@
-package io.github.e1turin.cirkt.state
+package io.github.e1turin.cirkt
 
 interface StateDumper {
     fun dumpStateByte(name: String, value: Byte) {}
