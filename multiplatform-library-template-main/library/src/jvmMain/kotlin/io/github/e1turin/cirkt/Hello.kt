@@ -3,7 +3,9 @@ package io.github.e1turin.cirkt
 import io.github.e1turin.cirkt.jextracted.State
 import io.github.e1turin.cirkt.jextracted.dut_h
 import io.github.e1turin.cirkt.sample.Dut
-import io.github.e1turin.cirkt.state.DumpStateVisitor
+import io.github.e1turin.cirkt.sample.DutLibrary
+import io.github.e1turin.cirkt.sample.dumpTo
+import io.github.e1turin.cirkt.state.StateDumper
 import java.lang.foreign.Arena
 import java.lang.foreign.FunctionDescriptor
 import java.lang.foreign.Linker
@@ -65,7 +67,7 @@ fun playWithFFM() {
 private fun myFfmWrapper() {
     println("Hello my FFM World!")
     Arena.ofConfined().use { arena ->
-        val dut = Dut.instance(arena, "model")
+        val dut = Dut(arena, DutLibrary("model"))
 
         fun Dut.step(times: Int = 1) {
             for (i in 1..times) {
@@ -88,7 +90,7 @@ private fun myFfmWrapper() {
 
         println("dut.o=${dut.o}")
 
-        dut.dumpStateTo(object : DumpStateVisitor {
+        dut.dumpTo(object : StateDumper {
             override fun dumpStateByte(name: String, value: Byte) {
                 println("$name: $value")
             }

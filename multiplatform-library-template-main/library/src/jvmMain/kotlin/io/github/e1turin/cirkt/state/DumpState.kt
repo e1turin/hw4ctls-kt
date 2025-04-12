@@ -1,6 +1,6 @@
 package io.github.e1turin.cirkt.state
 
-interface DumpStateVisitor {
+interface StateDumper {
     fun dumpStateByte(name: String, value: Byte) {}
     fun dumpStateShort(name: String, value: Short) {}
     fun dumpStateInt(name: String, value: Int) {}
@@ -13,5 +13,5 @@ interface DumpStateVisitor {
 }
 
 interface Dumpable {
-    fun dumpTo(visitor: DumpStateVisitor)
+    fun dumpTo(visitor: StateDumper)
 }
