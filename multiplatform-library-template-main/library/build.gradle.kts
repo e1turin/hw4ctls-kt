@@ -70,6 +70,9 @@ kotlin {
                 implementation("com.squareup:kotlinpoet:2.1.0")
             }
 
+            val generatedJvmDir = layout.buildDirectory.dir("generated/sources/cirkt/kotlin/main")
+            kotlin.srcDirs(generatedJvmDir)
+
             resources.srcDirs("src/jvmMain/resources")
         }
     }

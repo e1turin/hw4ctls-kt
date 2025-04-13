@@ -1,11 +1,11 @@
-package io.github.e1turin.cirkt
+package io.github.e1turin.cirkt.model
 
 import java.lang.foreign.*
 import java.lang.invoke.MethodHandle
 
 abstract class ModelLibrary(
     val name: String,
-    val arena: Arena,
+    arena: Arena,
     val evalFnSym: String,
     val initialFnSym: String,
     val finalFnSym: String,

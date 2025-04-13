@@ -1,6 +1,6 @@
 package io.github.e1turin.cirkt.state
 
-import io.github.e1turin.cirkt.Model
+import io.github.e1turin.cirkt.model.Model
 import java.lang.foreign.ValueLayout
 import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadWriteProperty

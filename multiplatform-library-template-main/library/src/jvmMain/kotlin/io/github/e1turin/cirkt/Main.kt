@@ -1,9 +1,10 @@
 package io.github.e1turin.cirkt
 
 import io.github.e1turin.cirkt.arcilator.StateFile
-import io.github.e1turin.cirkt.generator.generate
+import io.github.e1turin.cirkt.model.ModelClassGenerator
 import kotlinx.serialization.json.Json
 import java.io.File
+import java.nio.file.Paths
 
 class Main {
     companion object {
@@ -16,7 +17,18 @@ class Main {
 
             println(models[0])
 
-            generate(models[0], "src/jvmMain/kotlin", "io.github.e1turin.cirkt.generated")
+            val gen = ModelClassGenerator(
+                models[0],
+                openModelClass = true,
+                openLibraryClass = true,
+                internalStateProjections = true,
+                allStateProjectionsOpen = true,
+                allStateProjectionsMutable = true
+            )
+            val fs = gen.generateFileSpec( "io.github.e1turin.cirkt.generated")
+            // add source set in build.gradle.kts
+            // "/absolute/path/to/build/generated/sources/cirkt/kotlin/main"
+            fs.writeTo(Paths.get("src/jvmMain/kotlin"))
 
             playWithFFM()
         }

@@ -1,7 +1,7 @@
 package io.github.e1turin.cirkt.sample
 
-import io.github.e1turin.cirkt.Model
-import io.github.e1turin.cirkt.ModelLibrary
+import io.github.e1turin.cirkt.model.Model
+import io.github.e1turin.cirkt.model.ModelLibrary
 import io.github.e1turin.cirkt.StateDumper
 import io.github.e1turin.cirkt.state.input
 import io.github.e1turin.cirkt.state.output

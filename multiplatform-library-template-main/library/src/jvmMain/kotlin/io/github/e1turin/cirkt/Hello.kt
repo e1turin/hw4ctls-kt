@@ -1,9 +1,9 @@
 package io.github.e1turin.cirkt
 
+import io.github.e1turin.cirkt.generated.DutModel
 import io.github.e1turin.cirkt.jextracted.State
 import io.github.e1turin.cirkt.jextracted.dut_h
 import io.github.e1turin.cirkt.sample.Dut
-import io.github.e1turin.cirkt.sample.DutLibrary
 import io.github.e1turin.cirkt.sample.dumpTo
 import java.lang.foreign.Arena
 import java.lang.foreign.FunctionDescriptor
@@ -41,9 +41,9 @@ fun playWithFFM() {
 private fun generatedFfmWrapper() {
     println("Hello generated FFM World!")
     Arena.ofConfined().use { arena ->
-        val dut = io.github.e1turin.cirkt.generated.Dut.instance(arena, "model")
+        val dut = DutModel.instance(arena, "model")
 
-        fun io.github.e1turin.cirkt.generated.Dut.step(times: Int = 1) {
+        fun DutModel.step(times: Int = 1) {
             for (i in 1..times) {
                 clk = 1
                 eval()
@@ -52,7 +52,7 @@ private fun generatedFfmWrapper() {
             }
         }
 
-        fun io.github.e1turin.cirkt.generated.Dut.reset(steps: Int = 0) {
+        fun DutModel.reset(steps: Int = 0) {
             reset = 1
             eval()
             step(steps)

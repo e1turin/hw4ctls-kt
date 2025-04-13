@@ -1,7 +1,7 @@
 package io.github.e1turin.cirkt.generated
 
-import io.github.e1turin.cirkt.Model
-import io.github.e1turin.cirkt.ModelLibrary
+import io.github.e1turin.cirkt.model.Model
+import io.github.e1turin.cirkt.model.ModelLibrary
 import io.github.e1turin.cirkt.state.input
 import io.github.e1turin.cirkt.state.output
 import io.github.e1turin.cirkt.state.register
@@ -13,7 +13,7 @@ import kotlin.Byte
 import kotlin.Long
 import kotlin.String
 
-public open class Dut(
+public open class DutModel(
   state: MemorySegment,
   lib: ModelLibrary,
 ) : Model(MODEL_NAME, state, lib, NUM_STATE_BYTES) {
@@ -21,15 +21,15 @@ public open class Dut(
 
   public open var reset: Byte by input<Byte>(1)
 
-  public open val internalClk: Byte by wire<Byte>(2)
+  public open var internalClk: Byte by wire<Byte>(2)
 
-  public open val internalReset: Byte by wire<Byte>(3)
+  public open var internalReset: Byte by wire<Byte>(3)
 
-  public open val internalReg: Byte by register<Byte>(5)
+  public open var internalReg: Byte by register<Byte>(5)
 
-  public open val internalO: Byte by wire<Byte>(6)
+  public open var internalO: Byte by wire<Byte>(6)
 
-  public open val o: Byte by output<Byte>(7)
+  public open var o: Byte by output<Byte>(7)
 
   public fun eval() {
     lib.evalFunctionHandle.invokeExact(state)
@@ -52,7 +52,7 @@ public open class Dut(
       arena: Arena,
       libraryName: String,
       libraryArena: Arena = Arena.ofAuto(),
-    ): Dut = Dut(arena.allocate(NUM_STATE_BYTES), DutLibrary(libraryName, libraryArena))
+    ): DutModel = DutModel(arena.allocate(NUM_STATE_BYTES), DutLibrary(libraryName, libraryArena))
   }
 }
 
@@ -63,8 +63,8 @@ public open class DutLibrary(
   override val evalFunctionHandle: MethodHandle = functionHandle(evalFnSym)
 
   override val initialFunctionHandle: MethodHandle
-    get() = throw NotImplementedError("No such symbol '$initialFnSym'")
+    get() = throw NotImplementedError("Symbol initialFnSym is not defined")
 
   override val finalFunctionHandle: MethodHandle
-    get() = throw NotImplementedError("No such symbol '$finalFnSym'")
+    get() = throw NotImplementedError("Symbol finalFnSym is not defined")
 }
