@@ -84,6 +84,15 @@ llvm-objdump --disassemble out/model.o | save -f out/model.objdump
 ```
 - now comparing `arc/out/model.objdump` and `chisel/out/model.objdump` says it is similar but not equal
 
+### With `circt-verilog`
+
+Utility `circt-verilog` is not provided by firtool toolchain release as it depends on unstable svlang lib.
+So if you want to use it, you should build your own CIRCT toolchain with flag `-DCIRCT_SLANG_FRONTEND_ENABLED=ON`
+
+```sh
+circt-verilog mux_2to1.sv --ir-hw -o mux_2to1.mlir
+```
+
 ## Build Model
 
 on macos it's prefered to use docker with `--platform=amd64`:
